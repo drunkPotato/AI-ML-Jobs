@@ -1,0 +1,122 @@
+<!-- home.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to My Django App</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Link to your CSS file -->
+    <style>
+        .container {
+            width: 80%; /* Adjust as needed */
+            margin: 0 auto; /* Center the container horizontally */
+            text-align: center; /* Center align text within the container */
+        }
+        .plot-container {
+            margin-top: 20px; /* Adjust spacing as needed */
+            text-align: center; /* Center align contents within the plot container */
+        }
+        .plot-container img {
+            display: block; /* Ensure the image is displayed as a block element */
+            margin: 0 auto; /* Center the image horizontally */
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center align items horizontally */
+        }
+        .image-container {
+            margin-top: 20px; /* Adjust spacing as needed */
+        }
+        .dropdown {
+            margin-top: 20px; /* Adjust spacing as needed */
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function fetchAndUpdateData() {
+                $.ajax({
+                    url: "",  // URL to your Django view
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        // Update content dynamically
+                        $("#welcome-message").text(data.welcome_message);
+                        $("#dynamic-image").attr("src", "{% static 'myapp/images/LOGO.jpg' %}");
+                        // Update more dynamic content as needed
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', status, error);
+                    }
+                });
+            }
+
+            // Call fetchAndUpdateData() initially
+            fetchAndUpdateData();
+
+            // Set interval to periodically fetch updates (every 5 seconds)
+            setInterval(fetchAndUpdateData, 5000); // 5000 milliseconds (5 seconds) interval example
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="welcome-message">Welcome to My Django App!</h1>
+            <p>Some message</p>
+        </header>
+
+        <main>
+            <!-- Dropdown switch -->
+            <div class="dropdown">
+                <label for="dropdown-select">Select an option:</label>
+                <select id="dropdown-select">
+                    {% for option in options %}
+                        <option value="{{ option }}" {% if option == selected_option %} selected {% endif %}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Selected content based on dropdown -->
+            <div id="selected-content">
+                {% if selected_option == 'Title' %}
+                    <h2>This is the Title option</h2>
+                    <!-- Display content for Title option -->
+                {% elif selected_option == 'Sector' %}
+                    <h2>This is the Sector option</h2>
+                    <!-- Display content for Sector option -->
+                {% elif selected_option == 'Location' %}
+                    <h2>This is the Location option</h2>
+                    <!-- Display content for Location option -->
+                {% else %}
+                    <h2>This is another option</h2>
+                    <!-- Display content for other options -->
+                {% endif %}
+            </div>
+
+            <!-- Dynamic image -->
+            <div class="image-container">
+                <img id="dynamic-image" src="{% static 'myapp/images/LOGO.jpg' %}" alt="My Image">
+            </div>
+
+            <!-- Plot container -->
+            <div class="plot-container">
+                <h1>Matplotlib Plot Example</h1>
+
+                <!-- Display the plot -->
+                <div>
+                    <img src="data:image/png;base64,{{ graphic }}" alt="Matplotlib Plot">
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer if applicable -->
+        <footer>
+            <p>&copy; 2024 HSLU AI & ML</p>
+        </footer>
+    </div>
+</body>
+</html>
