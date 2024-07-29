@@ -41,7 +41,7 @@ def contains_keywords(job_listing, keywords):
     return False
 
 # Read the job listings from the file
-with open("src/my_script/Data/txtfiles/formatted/formattedIndeed_artificialIntelligence.txt", "r", encoding="utf-8") as file:
+with open("src/my_script/Data/txtfiles/formatted/euresdata_formatted.txt", "r", encoding="utf-8") as file:
     content = file.read()
 
 # Split the content into individual job listings
@@ -51,6 +51,6 @@ job_listings = content.split("\n\n")
 filtered_listings = [listing for listing in job_listings if contains_keywords(listing, keywords)]
 
 # Write the filtered job listings to a new file
-with open("src/my_script/Data/txtfiles/final/filtered_formatted_indeed_artificial_intelligence.txt", "w", encoding="utf-8") as file:
+with open("src/my_script/Data/txtfiles/final/euresdata.txt", "w", encoding="utf-8") as file:
     for listing in filtered_listings:
         file.write(listing + "\n\n")
