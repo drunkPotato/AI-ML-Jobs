@@ -8,9 +8,10 @@ import json
 
 #Define the JobObject with the required attributes
 class JobObject:
-    def __init__(self, title, company, sector, publish_date, language, pensum, 
+    def __init__(self, id, title, company, sector, publish_date, language, pensum, 
                  contract_type, role, benefits, location, ai_tech, salary, techskills, softskills, degree, website):
 
+        self.id = id
         self.title = title
         self.company = company
         self.location = location
@@ -38,7 +39,7 @@ job_objects = []
 def createlist():
 
     #Acess .json file
-    with open(r'src/my_script/Data/responses/responses.json', 'r', encoding='utf-8') as file:
+    with open(r'src/my_script/Data/responseseures.json', 'r', encoding='utf-8') as file:
         try:
             data = file.read()
 
@@ -56,6 +57,7 @@ def createlist():
 
 #Acess each dictionary in the jobs list and set the fields to the according value
     for job in jobs:
+        id = job.get("MY ID")
         title = job.get("Title")
         company = job.get("Company")
         sector = job.get("Sector")
@@ -74,7 +76,7 @@ def createlist():
         website = job.get("Website")
 
 #create new JobObject with the fields of the .json object in the loop
-        job_object = JobObject(title, company, sector, publish_date, language, pensum, 
+        job_object = JobObject(id, title, company, sector, publish_date, language, pensum, 
                      contract_type, role, benefits, location, ai_tech, salary, techskills, softskills, degree, website)
 
 #Append the current JobObject to the list of JobObjects
