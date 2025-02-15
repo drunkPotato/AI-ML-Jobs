@@ -1,55 +1,87 @@
 import re
 import src.my_script.Classification as Classification
-#Input Dictionary with JobObject objects
 
-#Define different filter functions for the different criteria
-#Return List of JobObject objects fulfilling the requirements
 
-#The things that are passed are: 
-#The list itself
-#The input (the attribute we're interested in like: Company or Language)
-#The keyword we're looking for(e.g. French)
+#IMPORTANT:
+#At the moment this won't work since the attributes are not yet formatted to being lists
 
-def filtergetinput(lst, attribute, keyword):
+#It seems this function returns an empty list since it runs smoothly without any filter
 
-    outputlist = []
+
+#This is the logic of this program:
+#Filter are being passed as a key : value pair (e.g. "Jobtitle" : "Data Scientist")
+#We need to pass the key to know wich attribute we have to access in our JobObjects.
+#Then we apply logic and return a new list of JobObjects that match the criteria
+
+
+
+
+#This function checks all jobs if they contain a specific value in one of their attributes (key : value -- "Jobtitle" : "Data Scientist")
+def contains(jobs, filter):
     
-    #keywords = []
-    #category = [Classification.getcategory_mapping(attribute, keyword)]
+    #There shouldn't have been data as a filter because I didn't type it in. I don't know why it has
+    for item in filter.items():
+        print(item)
 
-    for job in lst:
-        atr = getattr(job, attribute.lower(), None)
+    print(len(jobs))
+    #define returned list
+    filteredList = []
 
-        print(atr)
+    #access the filter
+    key = list(filter.keys())[0] 
+    values = filter[key]
 
-        if atr is not None:
 
-            #if isinstance(atr, str):
-            #    atr_items = [item.strip().lower() for item in atr.split(',')]
-            #elif isinstance(atr, list):
-            #    atr_items = atr
-            #else:
-            #    pass
 
-            if keyword in atr:
-                outputlist.append(job)
+    ##The problem lies here
     
-    return outputlist
+    # Iterate over each job in the passed jobs list
+    for job in jobs:
+        
+        #We access the attribute of the job. --> For now this can be either a string or a list. I should change it to be lists only.
+        attr_value= getattr(job, key.lower(), "")
+
+        #Basically we have to do the same thing twice now for the different types of attributes
+
+        #If the attribute is a list (normal usecase in the future)
+        if (isinstance(attr_value, list)):
+            print("Are we even here??")
+
+            #We iterate over the all the filters there are
+            for value in values:
+
+                #Now we want to check if the value of the attribute is in the specific list that corresponds to the classification
+                #We access the category 'key' 
+                categorymapping = Classification.getcategory(key)
+                print("categorymapping:" ,categorymapping)
+                print("category specific element: ", categorymapping[value])
+                
+                #Now we access the correct element of our category 'key' (e.g. secotr )
+                for object in categorymapping[value]:
+                    for attr_val in attr_value:
+                        #Now we check if it can be counted as "in the category"
+                        if attr_val in object:
+                            if(job not in filteredList):
+                                filteredList.append(job)
+
+        elif (isinstance(attr_value, str)):
+            print("We're dealing with a string")
+
+            #We're iterating over the filters
+            for value in values:
+
+                categorymapping = Classification.getcategory(key)
+
+                #This doesn't work for the filters that are typed in by the user because they are not in the mapping of course
+                #So they have to be handled seperately
+                for object in categorymapping[value]:
+                    if attr_value.lower() in object:
+                        if(job not in filteredList):
+                            filteredList.append(job)
 
 
+    for filteredjob in filteredList:
+        print(getattr(filteredjob, key.lower(), ""))
 
-def filterleaveinput(list, input, keyword):
-
-    outputlist = []
-
-    for job in list:
-        attr_value = getattr(job, input.lower(), None)
-
-        if attr_value == None:
-            continue
-    
-        print("keyword: ", keyword, "item: ", attr_value)
-        if not any(keyword in item for item in attr_value):
-            outputlist.append(job)
-            
-    return outputlist
+    print(len(filteredList))
+    return filteredList

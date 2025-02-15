@@ -1,72 +1,96 @@
-from django.shortcuts import render
-import json
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
-import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
-import src
+import src.my_script.Executable as Executable
+import src.my_script.JobObject as JobObject
+import src.my_script.Filter as Filter
+from .forms import AttributeSelectionForm
+from .forms import FilterSelectionForm
+from .forms import GraphSelectionForm
 
-from src.my_script.Executable import main_function
-from src. my_script.Visualization import generate_graphs
 
-def plot_view(request):
-    # Generate a sample plot (replace with your actual plot generation logic)
-    plt.figure(figsize=(8, 6))
-    plt.plot([1, 2, 3, 4], [1, 4, 9, 16])
-    plt.title('Sample Plot')
-    plt.xlabel('X-axis')
-    plt.ylabel('Y-axis')
-    
-    # Convert plot to PNG image in memory
-    buffer = BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    plt.close()
+##This session.get has some issues because the filters do not reset after the plotting. Which is a PAIN.
+##I think it should be possible to set the filters to be empty again after passing it to the exe
+def plot(request):
+    plots = []
+
+    attributes = request.GET.getlist('attributes')
+
+
+    filters = {
+        'jobtitle': request.session.get('jobtitle', []),
+        'sector': request.session.get('sector', []),
+        'company': request.session.get('company', []),
+        'language': request.session.get('language', []),
+        'location': request.session.get('location', []),
+    }
+
+    for attribute in attributes:
+        
+        #Set up the data set & apply filters
+        jobs = JobObject.createlist()
+
+        
+        for key, value in filters.items(): 
+            if value != '' and value !=[]:
+                jobs = Filter.contains(jobs, {key : value})
+        
+
+        print("Graphtype i nthe views fiel", request.GET.get(f'graphtype_{attribute}'))
+        plt = Executable.run(attribute, request.GET.get(f'graphtype_{attribute}'), jobs)
+        
+        # Convert plot to PNG image in memory
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        plt.close()
+
+
+        plot_data = base64.b64encode(buffer.read()).decode('utf-8')
+        plots.append(plot_data)
 
     # Encode the PNG image to base64
-    graphic = base64.b64encode(buffer.read()).decode('utf-8')
-
-    return graphic
+    return plots
 
 
 def home(request):
 
-    selected_option = request.GET.get('option', 'Title')  # Default to 'Title' if option is not specified
-    options = ['Title', 'Sector', 'Location', 'Other Option']
-    graphic = plot_view(request)
+    if 'submit_filters' in request.GET:
+        print("Pressed Apply Filters")
+        
+        # Store filters in the session
+        request.session['jobtitle'] = request.GET.get('jobtitle', [])
+        request.session['sector'] = request.GET.getlist('sector', [])
+        request.session['company'] = request.GET.get('company', [])  
+        request.session['language'] = request.GET.getlist('language', [])  
+        request.session['location'] = request.GET.getlist('location', [])  
+
+    filter = FilterSelectionForm(request.GET or None)
+    form = AttributeSelectionForm(request.GET or None)
+    graph = GraphSelectionForm(request.GET or None)
+
+    plots = []
+
+    if form.is_valid():
+        plots = plot(request)        
+        request.session['plots'] = plots
+        return redirect('home')
+   
+    if 'plots' in request.session:
+        plots = request.session.pop('plots')
     
     context = {
         'welcome_message': 'Welcome to AI Job Help HSLU!',  # Update message here
-        'image_path': 'myapp/images/LOGO.jpg',
-        'selected_option' : selected_option,
-        'options' : options,
-        'graphic' : graphic
+        'form' : form,
+        'filter' : filter,
+        'plots' : plots,
+        'graph' : graph,
         # Add more dynamic data as needed
     }
     
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return JsonResponse(context)
+        # Only return JSON-serializable data
+        return JsonResponse({'plots': plots})
     
     return render(request, 'myapp/home.html', context)
-
-
-def view_that_uses_json(request):
-    # Assuming data.json is in your static directory
-    json_file_path = 'json/data.json'  # Adjust the path as per your setup
-    
-    with open(json_file_path, 'r') as json_file:
-        data = json.load(json_file)
-    
-    context = {
-        'json_data': data,
-    }
-    
-    return render(request, 'template.html', context)
-
-
-
-def index(request):
-    # Example usage of existing code
-    result = main_function()
-    graph_url = generate_graphs(result)
-    return render(request, 'index.html', {'graph_url': graph_url})

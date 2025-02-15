@@ -1,6 +1,8 @@
 from django.urls import path
-from . import views
+from .views import home, plot, apply_filters
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', home, name='home'),
+    path('plot/', plot, name='plot'),
+    path('apply-filters/', apply_filters, name='apply_filters'),
 ]

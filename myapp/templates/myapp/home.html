@@ -5,33 +5,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to My Django App</title>
+    <title>Welcome to My Domain</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Link to your CSS file -->
     <style>
+        header {
+            text-align: center;
+            margin: 0 auto;
+            width: 100%;
+            padding: 20px 0;
+        }
         .container {
-            width: 80%; /* Adjust as needed */
+            width: 100%; /* Adjust as needed */
             margin: 0 auto; /* Center the container horizontally */
-            text-align: center; /* Center align text within the container */
         }
         .plot-container {
             margin-top: 20px; /* Adjust spacing as needed */
-            text-align: center; /* Center align contents within the plot container */
+            text-align: left; /* Ensure no centering applied to the text in the plot container */
         }
         .plot-container img {
             display: block; /* Ensure the image is displayed as a block element */
-            margin: 0 auto; /* Center the image horizontally */
         }
         main {
             display: flex;
             flex-direction: column;
             align-items: center; /* Center align items horizontally */
+            width: 100%; 
         }
         .image-container {
             margin-top: 20px; /* Adjust spacing as needed */
         }
         .dropdown {
             margin-top: 20px; /* Adjust spacing as needed */
+            display: none; /* Initially hide the dropdown */
+        }
+        .row {
+            width: 100%;
+            content: "";
+            clear: both;
+            display: table;
+        }
+        .column {
+            float: left;
+            width: 45%;
+            padding: 5px;
         }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -65,51 +82,88 @@
 <body>
     <div class="container">
         <header>
-            <h1 id="welcome-message">Welcome to My Django App!</h1>
-            <p>Some message</p>
+            <h1 id="welcome-message">Welcome to Job Help AI ML!</h1>
+            <p>You can choose the Fields to display by pressing on the button 'Toggle Fields'</p>
         </header>
 
-        <main>
-            <!-- Dropdown switch -->
-            <div class="dropdown">
-                <label for="dropdown-select">Select an option:</label>
-                <select id="dropdown-select">
-                    {% for option in options %}
-                        <option value="{{ option }}" {% if option == selected_option %} selected {% endif %}>{{ option }}</option>
-                    {% endfor %}
+
+        <button type="button" class="toggle-button" onclick="toggleForm('form-container')">Show Filter</button>
+        <div id="form-container" class="dropdown">
+            <form method="get" action="{%url 'home' %}">
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; border: none;">
+                    
+                    {{ filter.jobtitle.label_tag }} <!-- Renders the label for job title -->
+                    {{ filter.jobtitle }} <!-- Renders the input for job title -->
+                    
+                    {{ filter.sector.label_tag }} <!-- Renders the label for sector -->
+                    {{ filter.sector }} <!-- Renders the checkboxes for sector -->
+        
+                    {{ filter.company.label_tag }} <!-- Renders the label for company -->
+                    {{ filter.company }} <!-- Renders the input for company -->
+        
+                    {{ filter.language.label_tag }} <!-- Renders the label for language -->
+                    {{ filter.language }} <!-- Renders the checkboxes for language -->
+        
+                    {{ filter.location.label_tag }} <!-- Renders the label for location -->
+                    {{ filter.location }} <!-- Renders the checkboxes for location -->
+                </div>
+                <input type="hidden" name="submit_filters" value="1"> <!-- Hidden input to detect form submission -->
+                <button type="submit">Apply Filter</button>
+            </form>
+        </div>
+
+        <button type="button" class="toggle-button" onclick="toggleForm('filter-container')">Show Fields</button>
+        <div id="filter-container" class="dropdown">
+            <form class='form-inline'method="get" action="{%url 'home' %}">
+                {% for value, label in form.attributes.field.choices %}
+                <div class="attribute-row">
+                <!-- Render the checkbox input -->
+                <input type="checkbox" name="attributes" value="{{ value }}" id="{{ value }}">
+                <label for="{{ value }}">{{ label }}</label>
+
+                <select name="graphtype_{{ value }}" style="display: inline;">
+                    <option value="bar">Bar</option>
+                    <option value="line">Line</option>
+                    <option value="pie">Pie</option>
+                    <option value="scatter">Scatter</option>
+                    <option value="area">Area</option>
                 </select>
-            </div>
+                </div>
+                {% endfor %}
+            <input type="hidden" name="submit" value="1">
+            <button type="submit">Show Plots</button>
+            </form>
+        </div>
 
-            <!-- Selected content based on dropdown -->
-            <div id="selected-content">
-                {% if selected_option == 'Title' %}
-                    <h2>This is the Title option</h2>
-                    <!-- Display content for Title option -->
-                {% elif selected_option == 'Sector' %}
-                    <h2>This is the Sector option</h2>
-                    <!-- Display content for Sector option -->
-                {% elif selected_option == 'Location' %}
-                    <h2>This is the Location option</h2>
-                    <!-- Display content for Location option -->
-                {% else %}
-                    <h2>This is another option</h2>
-                    <!-- Display content for other options -->
-                {% endif %}
-            </div>
+            <script>
+                // JavaScript function to toggle visibility
+                function toggleForm(id) {
+                    var formContainer = document.getElementById(id);
+                    if (formContainer.style.display === "block") {
+                        formContainer.style.display = "none";
+                    } else {
+                        formContainer.style.display = "block";
+                    }
+                }
+            </script>
 
-            <!-- Dynamic image -->
-            <div class="image-container">
-                <img id="dynamic-image" src="{% static 'myapp/images/LOGO.jpg' %}" alt="My Image">
-            </div>
 
             <!-- Plot container -->
             <div class="plot-container">
-                <h1>Matplotlib Plot Example</h1>
+                    {% for plot in plots %}
+                    {% if forloop.counter0|divisibleby:2 %} 
+                        <!-- Create a new row every two graphs-->
+                        <div class="row">
+                    {% endif %}
 
-                <!-- Display the plot -->
-                <div>
-                    <img src="data:image/png;base64,{{ graphic }}" alt="Matplotlib Plot">
-                </div>
+                            <div class="column">
+                                <img src="data:image/png;base64,{{ plot }}" alt="Plot" class="img-fluid" style="max-width: 100%; height: auto;">
+                            </div>
+                        {% if forloop.counter|divisibleby:2 and not forloop.last %}
+                        </div> 
+                        {% endif %}
+
+                    {% endfor %} 
             </div>
         </main>
 

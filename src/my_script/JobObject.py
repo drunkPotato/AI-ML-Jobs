@@ -8,16 +8,16 @@ import json
 
 #Define the JobObject with the required attributes
 class JobObject:
-    def __init__(self, id, title, company, sector, publish_date, language, pensum, 
+    def __init__(self, id, jobtitle, company, sector, publish_date, language, workload, 
                  contract_type, role, benefits, location, ai_tech, salary, techskills, softskills, degree, website):
 
         self.id = id
-        self.title = title
+        self.jobtitle = jobtitle
         self.company = company
         self.location = location
         self.sector = sector
         self.language = language
-        self.pensum = pensum
+        self.workload = workload
         self.contract_type = contract_type
         self.role = role
         self.benefits = benefits
@@ -31,15 +31,16 @@ class JobObject:
 
 
 
-jobs = []
-job_objects = []
 
 
 #Takes a json file and transforms it to a JobObject list.
 def createlist():
 
+    jobs = []
+    job_objects = []
+
     #Acess .json file
-    with open(r'src/my_script/Data/responseseures.json', 'r', encoding='utf-8') as file:
+    with open(r'src/my_script/Data/responses/combined.json', 'r', encoding='utf-8') as file:
         try:
             data = file.read()
 
@@ -58,7 +59,7 @@ def createlist():
 #Acess each dictionary in the jobs list and set the fields to the according value
     for job in jobs:
         id = job.get("MY ID")
-        title = job.get("Title")
+        jobtitle = job.get("Jobtitle")
         company = job.get("Company")
         sector = job.get("Sector")
         publish_date = job.get("Publish Date")
@@ -69,14 +70,14 @@ def createlist():
         techskills = job.get("Techskills")
         softskills = job.get("Softskills")
         degree = job.get("Degree")    
-        pensum = job.get("Pensum")
+        workload = job.get("Workload")
         contract_type = job.get("Contract Type")
         role = job.get("Role")
         benefits = job.get("Benefits")
         website = job.get("Website")
 
 #create new JobObject with the fields of the .json object in the loop
-        job_object = JobObject(id, title, company, sector, publish_date, language, pensum, 
+        job_object = JobObject(id, jobtitle, company, sector, publish_date, language, workload, 
                      contract_type, role, benefits, location, ai_tech, salary, techskills, softskills, degree, website)
 
 #Append the current JobObject to the list of JobObjects

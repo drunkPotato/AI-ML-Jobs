@@ -5,32 +5,22 @@ def main_function():
 
 import src.my_script.Visualization as Visualization
 import src.my_script.Classification as Classification
-import src.my_script.JobObject as JobObject
-import src.my_script.Filter as Filter
- 
 
 
-#Think about what the inputs are
-#They should be: Filters, Keywords, 
-def run(input):
 
 
-    #create a Job Object list
-    #In the future this list should be passed instead of coded into the JobObject class
-    jobs = JobObject.createlist()
+#Passed attributes are: Filters, Keywords, and the list
+def run(input, graphtype, jobs):
 
-    #Should only return a list of JobObjects with the value Finance in the Sector attribute
-    #jobs = Filter.filtergetinput(jobs, "Sector", "Finance")
+    print("Input in the exe file", input)
 
     normalized_values = []
     
     for job in jobs:
         normalized_values.append(Classification.normalize(getattr(job, input.lower())))
 
-    #normalized_values = Filter.filtergetinput(normalized_values, "Sector", "Finance")
-    #jobs = Filter.filterleaveinput(jobs, "Language", "Deutsch")
 
-    print("length jobs after filed", len(jobs))
+    #### Rework this Classification part please
 
 
     #Classify the now normalized values
@@ -44,24 +34,22 @@ def run(input):
 
     if len(classified_list) != len(normalized_values):
         print("length classified list: ", len(classified_list), " Length normalized values: ", len(normalized_values))
-        #print(len(classified_list), ",", len(normalized_values))
 
     #Visually Display the Data
-    return(Visualization.plotinput(classified_list))
+    return(Visualization.plotinput(classified_list, graphtype, input))
 
-#run("Title")
+#weirdly little results (What is the issue?):
 #run("Company")
-#run("Location")
-run("Sector")
-#run("Language")
-#run("Pensum")
-##run("Contract Type")
-#run("Role")
-#run("Benefits")
-##run("Publish_Date")
-##run("Ai_Tech")
-##run("Salary")
-#run("Techskills")
-#run("Softskills")
-#run("Degree")
-#run("Website")
+
+
+
+#Doesnt exist yet:
+##run("URL")
+
+
+#Bad Reading by GPT:
+#run("Ai_Tech")
+#run("Salary")
+#run("Publish_Date")
+
+

@@ -21,6 +21,5 @@ from myapp import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),  # URL for the homepage
-    path('view-json/', views.view_that_uses_json, name='view_json'),  # Example URL for JSON view
     # Add more URLs as needed
 ]
